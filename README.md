@@ -5,7 +5,7 @@ A small utility to genereate .docx and .xlsx by specified template and mapping d
 
 ## Installation
 
-  npm install gendoc.tar
+  npm install kling-igor/gendoc.git
 
 ## Usage
 
