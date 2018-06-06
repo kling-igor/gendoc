@@ -1,0 +1,32 @@
+{
+  "name": "gendoc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "babel src/ -d dist/ -s",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "exec": "cd dist && node ./index.js && cd .."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^5.0.0",
+    "jszip": "^3.1.5",
+    "node-fs-extra": "^0.8.2",
+    "path": "^0.12.7",
+    "sax": "^1.2.4",
+    "timm": "^1.4.2",
+    "vm": "^0.1.0",
+    "xlsx-template": "^0.3.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1"
+  }
+}
