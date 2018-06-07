@@ -1,7 +1,7 @@
 {
-  "name": "gendoc",
+  "name": "@igorkling/gendoc",
   "version": "1.0.0",
-  "description": "",
+  "description": "A small utility to generate .docx and .xlsx template based documents.",
   "main": "dist/index.js",
   "files": [
     "dist"
@@ -15,7 +15,14 @@
     "type": "git",
     "url": "https://github.com/kling-igor/gendoc.git"
   },
-  "keywords": [],
+  "keywords": [
+    "template",
+    "xlsx",
+    "docx"
+  ],
+  "engines": {
+    "node": ">= 8.0.0"
+  },
   "author": "Igor Kling",
   "license": "ISC",
   "dependencies": {
