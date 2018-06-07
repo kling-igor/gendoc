@@ -64,7 +64,7 @@ const DOCX_MAPPING_DATA = {
   name: 'John',
   lastname: 'Dow',
   images: [
-    { id: 'image_1.png', label: 'Some optional image desriptions' },
+    { id: 'image_1.png', label: 'Some optional image description' },
     { id: 'image_2.png' },
     { id: 'image_3.png' },
     { id: 'image_4.png' }
