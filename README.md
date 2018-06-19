@@ -3,6 +3,10 @@ GenDoc
 
 A small utility to genereate .docx and .xlsx by specified template and mapping data.
 
+## Requirements
+
+Dependent on *babel-runtime*
+
 ## Installation
 
 Via npm:
@@ -48,7 +52,9 @@ const XLSX_MAPPING_DATA = {
   ]
 }
 
-gendoc(PATH_TO_XLSX_TEMPLATE_FILE, PATH_TO_XLSX_REPORT_FILE, XLSX_MAPPING_DATA)
+const generator = new GenDoc()
+
+generator.createReport(PATH_TO_XLSX_TEMPLATE_FILE, PATH_TO_XLSX_REPORT_FILE, XLSX_MAPPING_DATA)
   .then(() => {
     console.log('xlsx generate complete')
   })
@@ -64,10 +70,10 @@ const DOCX_MAPPING_DATA = {
   name: 'John',
   lastname: 'Dow',
   images: [
-    { id: 'image_1.png', label: 'Some optional image description' },
-    { id: 'image_2.png' },
-    { id: 'image_3.png' },
-    { id: 'image_4.png' }
+    { path: 'image_1.png', label: 'Some optional image description' },
+    { path: 'image_2.png' },
+    { path: 'image_3.png' },
+    { path: 'image_4.png' }
   ],
   companies: [
     {
@@ -133,7 +139,23 @@ const PATH_TO_DOCX_REPORT_FILE = path.resolve(path.dirname(require.main.filename
 
 const PLACEHOLDER_DELIMETER = '#' // default value - may be ommited
 
-gendoc(PATH_TO_DOCX_TEMPLATE_FILE, PATH_TO_DOCX_REPORT_FILE, XLSX_MAPPING_DATA, PLACEHOLDER_DELIMETER)
+const readFile = async (imageInfo) => {
+  // path is the module name
+  const { path: filename } = imageInfo
+
+  const imagePath = path.join(processPath, filename)
+  const extension = path.extname(filename).substring(1)
+
+  const buffer = await fse.readFile(imagePath)
+
+  const base64 = buffer.toString('base64')
+
+  return { extension, data: base64 }
+}
+
+const generator = new GenDoc(readFile)
+
+generator.createReport(PATH_TO_DOCX_TEMPLATE_FILE, PATH_TO_DOCX_REPORT_FILE, XLSX_MAPPING_DATA, PLACEHOLDER_DELIMETER)
   .then(() => {
     console.log('docx generate complete')
   })
@@ -142,6 +164,12 @@ gendoc(PATH_TO_DOCX_TEMPLATE_FILE, PATH_TO_DOCX_REPORT_FILE, XLSX_MAPPING_DATA, 
   })
 ```
 
+It is up to you how specify images in mapping data - as local filenames or web links.
+You have to provide image reading function. If there are no images expected in .docx then
+image reading function can be ommited.
+
+
 ## Release History
 
+* 2.0.0 Image reading function
 * 1.0.0 Initial release

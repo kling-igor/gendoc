@@ -1,50 +1,97 @@
-import createReport from './docxtemplate/indexNode';
 import XlsxTemplate from 'xlsx-template'
+// import { decode } from 'base64-arraybuffer'
 import path from 'path'
 import fse from "fs-extra"
+import DocxTemplate from './docxtemplate'
 
-function gendoc(templatePath, reportPath, mappingData, delimeter) {
-  const ext = path.extname(templatePath)
 
-  if (ext === '.docx') {
-    createReport({
-      template: templatePath,
-      output: reportPath,
-      data: mappingData,
-      cmdDelimiter: '#',
-      noSandbox: true // INSECURE - USE ONLY WITH TRUSTED TEMPLATES
-    });
-    return Promise.resolve()
+const readFile = async (imageInfo) => {
+  throw new Error('you should pass function to GenDoc to handle IMAGE tags data in docx template')
+}
+
+
+class GenDoc {
+
+  // { extension: ext, data: base64Buffer }
+
+  /**
+   *Creates an instance of GenDoc.
+   * @param {Interface} fileService - an interface with readFile method
+   * @memberof GenDoc
+   */
+  constructor(onReadImage = readFile) {
+    this.docxTemplate = new DocxTemplate(onReadImage)
   }
-  else if (ext === '.xlsx') {
-    return fse.readFile(templatePath)
-      .then(data => {
-        const xlsxTemplate = new XlsxTemplate(data)
-        xlsxTemplate.substitute(1, mappingData)
-        const report = xlsxTemplate.generate({ type: 'uint8array' })
-        return fse.writeFile(reportPath, report)
+
+  /**
+   * create report asynchronously
+   * @param {string} templatePath - template file path
+   * @param {string} reportPath - report file path
+   * @param {object} mappingData - data to be visualized in the report
+   * @param {string} delimeter - character or characters sequence in template
+   * @return {Promise} - a promise resolved by write file operation finish
+   */
+  async createReport(templatePath, reportPath, mappingData, delimeter = '#') {
+    const ext = path.extname(templatePath)
+
+    if (ext === '.docx') {
+      return this.docxTemplate.createReport({
+        template: templatePath,
+        reportPath,
+        data: mappingData,
+        cmdDelimiter: delimeter,
+        noSandbox: true // INSECURE - USE ONLY WITH TRUSTED TEMPLATES
       })
-      .catch(e => {
-        console.log(`something went wrong:`, e)
-        return Promise.reject(e)
-      })
-  }
-  else {
+    } else if (ext === '.xlsx') {
+      return fse.readFile(template)
+        .then(data => {
+          const xlsxTemplate = new XlsxTemplate(data)
+          xlsxTemplate.substitute(1, mappingData)
+          const report = xlsxTemplate.generate({ type: 'uint8array' })
+          return fse.writeFile(reportPath, report)
+        })
+        .catch(e => {
+          console.error(`something went wrong:`, e)
+          return Promise.reject(e)
+        })
+    }
     throw new Error(`unsupported file extension ${ext}`)
   }
 }
 
-//#################
+export default GenDoc
+
+
+
+// HOW TO USE!!!
 /*
-// для тестирования шаблона нужно указывать имена файлов картинок которые ДОЛЖНЫ лежать рядом с запускаемым файлом (в эксплуатации используются id)
+
+const processPath = path.dirname(require.main.filename)
+
+const readFile = async (imageInfo) => {
+  // path is the module name
+  const { path: filename } = imageInfo
+
+  const imagePath = path.join(processPath, filename)
+  const extension = path.extname(filename).substring(1)
+
+  const buffer = await fse.readFile(imagePath)
+
+  const base64 = buffer.toString('base64')
+
+  return { extension, data: base64 }
+}
+
+const genDoc = new GenDoc(readFile)
+
 const DOCX_MAPPING_DATA = {
   name: 'John',
   lastname: 'Dow',
   images: [
-    { id: 'card_1.png', label: 'ОПЦИОНАЛЬНОЕ ОПИСАНИЕ ФОТОЧКИ' },
-    { id: 'card_2.png' },
-    { id: 'card_3.png' },
-    { id: 'card_4.png' }
+    { id: 'image_1.png', label: 'Some optional image description' },
+    { id: 'image_2.png' },
+    { id: 'image_3.png' },
+    { id: 'image_4.png' }
   ],
   companies: [
     {
@@ -100,85 +147,19 @@ const DOCX_MAPPING_DATA = {
           ]
         }
       ]
-    },
-    {
-      name: 'Lind Group',
-      people: [
-        {
-          name: 'Reginald Lowe',
-          projects: [
-            {
-              name: 'Reginald`s project 1'
-            },
-            {
-              name: 'Reginald`s project 2'
-            }
-          ]
-        },
-        {
-          name: 'Raul Tucker',
-          projects: [
-            {
-              name: 'Raul`s project 1'
-            },
-            {
-              name: 'Raul`s project 2'
-            }
-          ]
-        }
-      ]
     }
   ]
 }
 
-const PATH_TO_DOCX_TEMPLATE_FILE = path.resolve(path.dirname(require.main.filename), 'template.docx')
+const templatePath = path.join(processPath, 'template.docx')
+const reportPath = path.join(processPath, 'report.docx')
 
-const PATH_TO_DOCX_REPORT_FILE = path.resolve(path.dirname(require.main.filename), 'report.docx')
+genDoc.createReport(templatePath, reportPath, DOCX_MAPPING_DATA, '#')
+  .then(() => {
+    console.log('DONE')
+  })
+  .catch(e => {
+    console.error(e)
+  })
 
-const PLACEHOLDER_DELIMETER = '#' // default value - may be ommited
-
-// ########################
-
-const XLSX_MAPPING_DATA = {
-  title: 'StarWars Persons',
-  persons: [
-    {
-      firstName: 'Anakin',
-      lastName: 'Skywalker'
-    },
-    {
-      firstName: 'Lea',
-      lastName: 'Organa'
-    },
-    {
-      firstName: 'Han',
-      lastName: 'Solo'
-    },
-  ]
-}
-
-const PATH_TO_XLSX_TEMPLATE_FILE = path.resolve(path.dirname(require.main.filename), 'template.xlsx')
-
-const PATH_TO_XLSX_REPORT_FILE = path.resolve(path.dirname(require.main.filename), 'report.xlsx')
-
-// gendoc(PATH_TO_DOCX_TEMPLATE_FILE, PATH_TO_DOCX_REPORT_FILE, DOCX_MAPPING_DATA, PLACEHOLDER_DELIMETER)
-//   .then(() => {
-//     console.log('docx generate complete')
-//   })
-//   .catch(e => {
-//     console.error(e)
-//   })
-
-
-// gendoc(PATH_TO_XLSX_TEMPLATE_FILE, PATH_TO_XLSX_REPORT_FILE, XLSX_MAPPING_DATA)
-//   .then(() => {
-//     console.log('xlsx generate complete')
-//   })
-//   .catch(e => {
-//     console.error(e)
-//   })
-
-
-//#################
 */
-export default gendoc
