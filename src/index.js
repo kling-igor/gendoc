@@ -43,7 +43,7 @@ class GenDoc {
         noSandbox: true // INSECURE - USE ONLY WITH TRUSTED TEMPLATES
       })
     } else if (ext === '.xlsx') {
-      return fse.readFile(template)
+      return fse.readFile(templatePath)
         .then(data => {
           const xlsxTemplate = new XlsxTemplate(data)
           xlsxTemplate.substitute(1, mappingData)
