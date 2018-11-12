@@ -10,8 +10,18 @@ import { getCurLoop } from './reportUtils';
 // the `literalXmlDelimiter` separators)
 // See more details in runUserJsAndGetRaw() below.
 const runUserJsAndGetString = async (data, code, ctx) => {
-  const result = await runUserJsAndGetRaw(data, code, ctx);
+
+  let result
+  try {
+    result = await runUserJsAndGetRaw(data, code, ctx);
+  }
+  catch (e) {
+    console.error(e)
+    throw e
+  }
+
   if (result == null) return '';
+
   let str = String(result);
   if (ctx.options.processLineBreaks) {
     const { literalXmlDelimiter } = ctx.options;

@@ -444,8 +444,9 @@ class TemplateProcessor {
 
         // INS <expression>
       } else if (cmdName === 'INS') {
-        if (!isLoopExploring(ctx))
+        if (!isLoopExploring(ctx)) {
           out = await runUserJsAndGetString(data, cmdRest, ctx);
+        }
 
         // EXEC <code>
       } else if (cmdName === 'EXEC') {
@@ -647,6 +648,8 @@ const appendTextToTagBuffers = (text, ctx, options) => {
 };
 
 const getNextItem = (items, curIdx0) => {
+  if (!Array.isArray(items)) throw new Error('FOR requires array only...')
+
   let nextItem = null;
   let curIdx = curIdx0 != null ? curIdx0 : -1;
   while (nextItem == null) {
